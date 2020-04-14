@@ -1,0 +1,26 @@
+{
+  "name": "mssql-driver",
+  "version": "1.0.0",
+  "description": "MSSql tsdbc driver",
+  "main": "index.js",
+  "scripts": {
+    "test": "../api/node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/msimmons/tsdbc"
+  },
+  "keywords": [
+    "database",
+    "typescript"
+  ],
+  "author": "contrapt",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mssql": "^6.0.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "mssql": "^6.2.0"
+  }
+}
