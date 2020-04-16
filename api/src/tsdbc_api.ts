@@ -101,6 +101,10 @@ export class DatabaseError extends Error {
     readonly vendor: any
 }
 
+export interface Driver {
+    load(config: any, vendorConfig?: any) : DataSource
+}
+
 export interface DataSource {
     connect(autoCommit?: boolean) : Promise<Connection>
     metaData() : Promise<DatabaseMetadata>

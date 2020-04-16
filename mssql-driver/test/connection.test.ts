@@ -1,9 +1,9 @@
 import { MSSQLDataSource } from '../src/data_source'
 import * as mssql from 'mssql'
-import {expect} from '../../api/node_modules/chai'
-import * as M from '../../api/node_modules/mocha'
+import {expect} from 'chai'
+import 'mocha'
 import {config} from './test_config'
 
-M.describe('A Connection', () => {
+describe('A Connection', () => {
     let ds = new MSSQLDataSource(config)
 })

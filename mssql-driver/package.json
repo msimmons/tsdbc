@@ -4,7 +4,7 @@
   "description": "MSSql tsdbc driver",
   "main": "index.js",
   "scripts": {
-    "test": "../api/node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
+    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
   },
   "repository": {
     "type": "git",

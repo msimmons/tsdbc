@@ -1,14 +1,14 @@
 import { MSSQLDataSource } from '../src/data_source'
-import * as M from '../../api/node_modules/mocha'
-import {expect} from '../../api/node_modules/chai'
+import 'mocha'
+import {expect} from 'chai'
 import {config} from './test_config'
 import { RowSet, DatabaseError } from '../../api/src/tsdbc_api'
 import { stat } from 'fs'
 
-M.describe('A Statement', () => {
+describe('A Statement', () => {
     let ds = new MSSQLDataSource(config)
 
-    M.it('Executes a statement', async () => {
+    it('Executes a statement', async () => {
         let cnx = await ds.connect(false)
         let statement = cnx.createStatement()
         statement.fetchSize = 500
@@ -27,7 +27,7 @@ M.describe('A Statement', () => {
         await cnx.commit()
     })
 
-    M.it('Fails on a bad statement', async () => {
+    it('Fails on a bad statement', async () => {
         let cnx = await ds.connect(true)
         let statement = cnx.createStatement()
         let caught: DatabaseError
@@ -41,7 +41,7 @@ M.describe('A Statement', () => {
         console.log(caught.message)
     })
 
-    M.it('Executes a DDL and DML statement', async () => {
+    it('Executes a DDL and DML statement', async () => {
         let cnx = await ds.connect(true)
         let statement = cnx.createStatement()
         statement.fetchSize = 500
