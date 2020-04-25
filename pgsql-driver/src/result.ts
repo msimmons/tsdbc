@@ -1,4 +1,4 @@
-import { Result, RowSet, DatabaseError } from "../../api/src/tsdbc_api";
+import { Result, RowSet, DatabaseError } from "tsdbc";
 import { Cursor } from 'pg-cursor'
 import { QueryResultBase } from "pg";
 

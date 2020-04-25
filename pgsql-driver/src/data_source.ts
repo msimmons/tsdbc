@@ -1,4 +1,4 @@
-import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData } from '../../api/src/tsdbc_api'
+import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData } from 'tsdbc'
 import { PGConnection } from './connection'
 import { SQL } from './sql'
 import { Pool, PoolConfig }  from 'pg'

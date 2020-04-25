@@ -9,6 +9,12 @@ CLIENT_INFO:
    APP_NAME() as app_name, 
    DB_NAME() as db_name
 `,
+DATABASES:
+`select
+   name
+from
+   sys.databases
+`,
 NAMESPACES: 
 `select
    name

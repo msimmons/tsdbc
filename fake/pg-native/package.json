@@ -1,0 +1,21 @@
+{
+    "name": "pg-native",
+    "version": "1.0.0",
+    "description": "Fake pg-native",
+    "main": "index.js",
+    "scripts": {
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/msimmons/tsdbc"
+    },
+    "keywords": [
+    ],
+    "author": "contrapt",
+    "license": "ISC",
+    "devDependencies": {
+    },
+    "dependencies": {
+    }
+  }
+  

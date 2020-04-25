@@ -2,9 +2,9 @@
   "name": "tsdbc",
   "version": "1.0.0",
   "description": "Database Connectivity for Typescript",
-  "main": "index.js",
+  "main": "./out/src/tsdbc_api.js",
   "scripts": {
-    "test": "../node_modules/mocha -r ts-node/register test/**/*.test.ts"
+    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
   },
   "repository": {
     "type": "git",

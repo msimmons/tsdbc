@@ -1,4 +1,4 @@
-import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from '../../api/src/tsdbc_api'
+import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from 'tsdbc'
 import { Pool, PoolClient } from 'pg'
 import { PGStatement } from './statement'
 

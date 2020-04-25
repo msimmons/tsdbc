@@ -22,10 +22,16 @@ export enum TransactionIsolation {
     None
 }
 
+export interface GrantData {
+    grantee: string
+    privileges: string[]
+}
+
 export interface TableData {
     namespace: string
     name: string
     columns: ColumnData[]
+    grants?: GrantData[]
 }
 export interface IndexData {
     name: string
@@ -33,6 +39,11 @@ export interface IndexData {
     position: number
     descending: boolean
     filter?: string
+}
+export interface RefData {
+    namespace: string
+    table: string
+    column: string
 }
 export interface ColumnData {
     name: string
@@ -43,13 +54,14 @@ export interface ColumnData {
     nullable?: boolean
     autoincrement?: boolean
     keySequence?: number
-    references?: [TableData, ColumnData]
+    references?: RefData
     indices: IndexData[]
 }
 export interface ViewData {
     namespace: string
     name: string
     columns: ColumnData[]
+    grants?: GrantData[]
 }
 export interface SequenceData {
     namespace: string
@@ -67,6 +79,7 @@ export interface ProcedureData {
     namespace: string
     name: string
     parameters: ParameterData[]
+    grants?: GrantData[]
 }
 export interface SynonymData{
     namespace: string
@@ -109,6 +122,7 @@ export interface DataSource {
     connect(autoCommit?: boolean) : Promise<Connection>
     metaData() : Promise<DatabaseMetadata>
     clientInfo() : Promise<Map<string, string>>
+    close() : Promise<void>
 }
 
 export interface Connection {
@@ -189,3 +203,12 @@ export interface CallableStatement extends Statement {
 }
 
 export interface PreparedStatement extends Statement {}
+
+export class DriverManager {
+
+    static async load(path: string) : Promise<Driver> {
+        let driver = await import(path)
+        console.log(driver)
+        return driver.driver
+    }
+}

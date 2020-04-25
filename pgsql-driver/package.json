@@ -4,7 +4,8 @@
   "description": "Postgres tsdbc driver",
   "main": "index.js",
   "scripts": {
-    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
+    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts",
+    "build": "../node_modules/.bin/parcel build src/driver.ts --target node --bundle-node-modules"
   },
   "repository": {
     "type": "git",
@@ -17,11 +18,12 @@
   "author": "contrapt",
   "license": "ISC",
   "devDependencies": {
-    "@types/pg": "^7.14.3",
-    "typescript": "^3.8.3"
+    "@types/pg": "^7.14.3"
   },
   "dependencies": {
     "pg": "^8.0.2",
-    "pg-cursor": "^2.1.9"
+    "pg-cursor": "^2.1.9",
+    "tsdbc": "file:../api",
+    "pg-native": "file:../fake/pg-native"
   }
 }

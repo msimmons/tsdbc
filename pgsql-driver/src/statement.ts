@@ -1,4 +1,4 @@
-import { Statement, Connection, ResultSetConcurrency, ResultSetHoldability, ResultSetType, Result, RowSet } from "../../api/src/tsdbc_api";
+import { Statement, Connection, ResultSetConcurrency, ResultSetHoldability, ResultSetType, Result, RowSet } from "tsdbc";
 import { PoolClient } from 'pg'
 import { PGResult } from "./result";
 import * as Cursor from 'pg-cursor'

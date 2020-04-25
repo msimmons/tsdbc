@@ -1,17 +1,17 @@
-import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from '../../api/src/tsdbc_api'
-import * as mssql from 'mssql'
+import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from 'tsdbc'
+import { Request, Transaction, ConnectionPool, ISOLATION_LEVEL } from 'mssql'
 import { MSSQLStatement } from './statement'
 
 export class MSSQLConnection implements Connection {
 
-    private request: mssql.Request
-    private transaction: mssql.Transaction
+    private request: Request
+    private transaction: Transaction
     private statement: MSSQLStatement
     
     autoCommit: boolean
     networkTimeout: number
 
-    constructor(pool: mssql.ConnectionPool, autoCommit: boolean) {
+    constructor(pool: ConnectionPool, autoCommit: boolean) {
         this.autoCommit = autoCommit
         if (autoCommit) {
             this.request = pool.request()
@@ -113,10 +113,10 @@ export class MSSQLConnection implements Connection {
         switch(isoIn) {
             case undefined: return undefined
             case TransactionIsolation.None: return undefined
-            case TransactionIsolation.ReadCommitted: return mssql.ISOLATION_LEVEL.READ_COMMITTED
-            case TransactionIsolation.ReadUncommitted: return mssql.ISOLATION_LEVEL.READ_UNCOMMITTED
-            case TransactionIsolation.RepeatableRead: return mssql.ISOLATION_LEVEL.REPEATABLE_READ
-            case TransactionIsolation.Serializable: return mssql.ISOLATION_LEVEL.SERIALIZABLE
+            case TransactionIsolation.ReadCommitted: return ISOLATION_LEVEL.READ_COMMITTED
+            case TransactionIsolation.ReadUncommitted: return ISOLATION_LEVEL.READ_UNCOMMITTED
+            case TransactionIsolation.RepeatableRead: return ISOLATION_LEVEL.REPEATABLE_READ
+            case TransactionIsolation.Serializable: return ISOLATION_LEVEL.SERIALIZABLE
             default: return undefined
         }
     }

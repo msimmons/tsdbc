@@ -1,10 +1,10 @@
-import { Statement, Connection, ResultSetConcurrency, ResultSetHoldability, ResultSetType, Result, RowSet } from "../../api/src/tsdbc_api";
-import * as mssql from 'mssql'
+import { Statement, Connection, ResultSetConcurrency, ResultSetHoldability, ResultSetType, Result, RowSet } from "tsdbc"
+import { Request } from 'mssql'
 import { MSSQLResult } from "./result";
 
 export class MSSQLStatement implements Statement {
 
-    private request: mssql.Request
+    private request: Request
     result: MSSQLResult
     sql: string
     //connection : Connection
@@ -16,7 +16,7 @@ export class MSSQLStatement implements Statement {
     //type: ResultSetType
     closed: boolean = false
 
-    constructor(request: mssql.Request) {
+    constructor(request: Request) {
         this.request = request
     }
 

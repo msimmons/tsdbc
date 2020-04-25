@@ -2,7 +2,7 @@ import { PGDataSource } from '../src/data_source'
 import 'mocha'
 import {expect} from 'chai'
 import {config} from './test_config'
-import { RowSet, DatabaseError } from '../../api/src/tsdbc_api'
+import { RowSet, DatabaseError } from 'tsdbc'
 
 describe('A Statement', () => {
     let ds = new PGDataSource(config)

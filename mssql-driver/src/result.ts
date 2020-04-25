@@ -1,5 +1,5 @@
-import { Result, RowSet, DatabaseError } from "../../api/src/tsdbc_api";
-import * as mssql from 'mssql'
+import { Result, RowSet, DatabaseError } from "tsdbc";
+import { Request } from 'mssql'
 
 /**
  * The result set represents results the columns of a query and a single batch of rows of size [fetchSize]
@@ -22,7 +22,7 @@ export class MSSQLRowSet implements RowSet {
 }
 
 export class MSSQLResult implements Result {
-    request: mssql.Request
+    request: Request
     updateCounts: number[]
     rowSets: MSSQLRowSet[] = []
     warnings: string[] = []
@@ -36,7 +36,7 @@ export class MSSQLResult implements Result {
     private currentRows = []
     private listenersAdded = false
 
-    constructor(request: mssql.Request, fetchSize: number) {
+    constructor(request: Request, fetchSize: number) {
         this.request = request
         this.fetchSize = fetchSize
     }

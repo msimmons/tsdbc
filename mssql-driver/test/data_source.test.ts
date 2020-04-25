@@ -1,9 +1,9 @@
 import { MSSQLDataSource } from '../src/data_source'
-import * as mssql from 'mssql'
+import * as fs from 'fs'
 import {expect} from 'chai'
 import 'mocha'
 import {config} from './test_config'
-import { DatabaseError } from '../../api/src/tsdbc_api'
+import { DatabaseError } from 'tsdbc'
 
 describe('A DataSource', () => {
 
@@ -39,7 +39,8 @@ describe('A DataSource', () => {
         let ds = new MSSQLDataSource(config)
         let info = await ds.metaData()
         expect(info.namespaces.length).to.be.gt(0)
-        let sys = info.namespaces.find(ns => ns.name === 'sys')
+        console.log(info.namespaces.map(ns => ns.name))
+        let sys = info.namespaces.find(ns => ns.name.endsWith('.sys'))
         expect(sys.tables.length).to.be.gt(0)
         expect(sys.tables[0].columns.length).to.be.gt(0)
         sys.tables.forEach(p => {
