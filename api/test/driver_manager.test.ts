@@ -1,7 +1,6 @@
 import {expect} from 'chai'
 import * as M from 'mocha'
-import { DataSource } from '../src/tsdbc_api'
-import { DriverManager } from '../src/driver_manager'
+import { DataSource, DriverManager } from '../src/tsdbc_api'
 
 M.describe('A Driver Manager', () => {
 

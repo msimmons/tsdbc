@@ -2,10 +2,11 @@
   "name": "pgsql-driver",
   "version": "1.0.0",
   "description": "Postgres tsdbc driver",
-  "main": "index.js",
+  "main": "./out/src/driver.js",
   "scripts": {
+    "compile": "tsc -p ./",
     "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts",
-    "build": "../node_modules/.bin/parcel build src/driver.ts --target node --bundle-node-modules"
+    "bundle": "../node_modules/.bin/parcel build src/driver.ts --target node --bundle-node-modules"
   },
   "repository": {
     "type": "git",
