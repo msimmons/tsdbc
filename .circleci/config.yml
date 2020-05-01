@@ -48,7 +48,7 @@ jobs:
           path: mssql-driver/dist
       - store_artifacts:
           path: pgsql-driver/dist
-  workflows:
+workflows:
   version: 2
   build_publish:
     jobs:
