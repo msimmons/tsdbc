@@ -4,7 +4,7 @@
   "description": "Database Connectivity for Typescript",
   "main": "./out/src/tsdbc_api.js",
   "scripts": {
-    "build": "tsc -p ./",
+    "build": "../node_modules/.bin/tsc -p ./",
     "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
   },
   "repository": {
