@@ -36,6 +36,8 @@ jobs:
             npm --prefix mssql-driver run bundle
             npm --prefix pgsql-driver install
             npm --prefix pgsql-driver run bundle
+            cd api
+            npm pack
       - save_cache:
           key: *npm_cache_key
           paths:
@@ -48,6 +50,8 @@ jobs:
           path: mssql-driver/dist
       - store_artifacts:
           path: pgsql-driver/dist
+      - store_artifacts:
+          path: api/dist
 workflows:
   version: 2
   build_publish:

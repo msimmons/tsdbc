@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "description": "Database Connectivity for Typescript",
   "main": "./out/src/tsdbc_api.js",
+  "files" :[
+    "out/src/**"
+  ],
   "scripts": {
     "build": "../node_modules/.bin/tsc -p ./",
-    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts"
+    "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts",
+    "prepack": "mkdir -p dist",
+    "postpack": "mv *.tgz dist"
   },
   "repository": {
     "type": "git",
