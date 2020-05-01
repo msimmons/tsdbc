@@ -1,0 +1,55 @@
+version: 2
+
+references:
+  npm-cache-keys: &npm_cache_keys
+    - npm-1-{{ checksum "package.json" }}-{{ checksum "api/package.json" }}-{{ checksum "mssql-driver/package.json" }}-{{ checksum "pgsql-driver/package.json" }}
+    - npm-1-{{ checksum "package.json" }}-{{ checksum "api/package.json" }}-{{ checksum "mssql-driver/package.json" }}-
+    - npm-1-{{ checksum "package.json" }}-{{ checksum "api/package.json" }}-
+    - npm-1-{{ checksum "package.json" }}-
+    - npm-1-
+
+  npm_cache_key: &npm_cache_key
+    nvm-1-{{ checksum "package.json" }}-{{ checksum "api/package.json" }}-{{ checksum "mssql-driver/package.json" }}-{{ checksum "pgsql-driver/package.json" }}
+
+jobs:
+  build:
+    working_directory: /home/work/build
+    docker:
+      - image: msimmons/nodejvm:latest
+        auth:
+          username: $DOCKER_USER
+          password: $DOCKER_PASSWORD
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            *npm_cache_keys
+      - run: 
+          shell: /bin/bash --login -eo pipefail 
+          command: |
+            source ~/.nvm/nvm.sh
+            nvm i 10
+            npm install
+            npm --prefix api install
+            npm --prefix api run build
+            npm --prefix mssql-driver install
+            npm --prefix mssql-driver run bundle
+            npm --prefix pgsql-driver install
+            npm --prefix pgsql-driver run bundle
+      - save_cache:
+          key: *npm_cache_key
+          paths:
+            - node_modules
+            - api/node_modules
+            - mssql-driver/node_modules
+            - pgsql-driver/node_modules
+            - ~/.nvm
+      - store_artifacts:
+          path: mssql-driver/dist
+      - store_artifacts:
+          path: pgsql-driver/dist
+  workflows:
+  version: 2
+  build_publish:
+    jobs:
+      - build

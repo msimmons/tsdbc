@@ -9,48 +9,52 @@ describe('A Statement', () => {
 
     it('Executes a statement', async () => {
         let cnx = await ds.connect(false)
-        let statement = cnx.createStatement()
-        statement.fetchSize = 100
+        cnx.fetchSize = 100
         await cnx.begin()
-        let set = await statement.execute('select * from pg_catalog.pg_class')
+        let result = await cnx.execute('select * from pg_catalog.pg_class')
+        let set = await result.fetch()
         let setCount = 0
         while(set) {
             if (set) {
                 setCount++
                 expect(set.columns.length).to.be.eq(33)
-                expect(set.rows.length).to.be.lte(statement.fetchSize)
+                expect(set.rows.length).to.be.lte(cnx.fetchSize)
             }
-            set = await statement.fetch()
+            set = await result.fetch()
         }
         expect(setCount).to.be.eq(4)
         await cnx.commit()
+        await cnx.close()
     })
 
     it('Fails on a bad statement', async () => {
         let cnx = await ds.connect(true)
-        let statement = cnx.createStatement()
         let caught: DatabaseError
         try {
-            await statement.execute('select * from sys.allf_objects')
+            let result = await cnx.execute('select * from sys.allf_objects')
+            await result.fetch()
         }
         catch(error) {
             caught = error
         }
         expect(caught).to.not.be.undefined
         console.log(caught.message)
+        await cnx.close()
     })
 
     it('Executes a DDL and DML statement', async () => {
         let cnx = await ds.connect(true)
-        let statement = cnx.createStatement()
-        statement.fetchSize = 500
+        cnx.fetchSize = 500
         try {
-            await statement.execute('drop table test')
+            let result = await cnx.execute('drop table test')
+            await result.fetch()
         }
         catch (error) {}
-        let rows = await statement.execute('create table test(col1 text)')
-        rows = await statement.execute(`insert into test values ('hello')`)
-        console.log(statement.result.updateCounts)
+        let result = await cnx.execute('create table test(col1 text)')
+        await result.fetch()
+        result = await cnx.execute(`insert into test values ('hello') returning *`)
+        let set = await result.fetch()
+        await cnx.close()
     })
 
 })

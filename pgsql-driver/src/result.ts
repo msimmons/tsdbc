@@ -13,6 +13,7 @@ export class PGRowSet implements RowSet {
     columns: any[] = []
     rows: any[] = []
     moreRows: boolean = true
+    rowCount: number;
 
     constructor(id: number, columns: any[], rows: any[], moreRows: boolean) {
         this.id = id
@@ -23,6 +24,7 @@ export class PGRowSet implements RowSet {
 }
 
 export class PGResult implements Result {
+    sql: string
     cursor: Cursor
     updateCounts: number[]
     rowSets: PGRowSet[] = []
@@ -32,7 +34,8 @@ export class PGResult implements Result {
     count: number
     fetchSize: number
 
-    constructor(cursor: Cursor, fetchSize: number) {
+    constructor(sql: string, cursor: Cursor, fetchSize: number) {
+        this.sql = sql
         this.cursor = cursor
         this.fetchSize = fetchSize
     }
@@ -44,7 +47,8 @@ export class PGResult implements Result {
                 else {
                     let qr = <QueryResultBase>this.cursor._result
                     this.updateCounts = [qr.rowCount]
-                    let rowSet = <RowSet>{columns: qr.fields, id: 0, moreRows: rows.length === this.fetchSize, rows: rows}
+                    let columns = qr.fields.map(f => f.name)
+                    let rowSet = <RowSet>{columns: columns, id: 0, moreRows: rows.length === this.fetchSize, rows: rows, rowCount: qr.rowCount}
                     if (!rowSet.moreRows) {
                         await this.cursor.close()
                         this.done = true
@@ -60,4 +64,8 @@ export class PGResult implements Result {
         return this.nextResultSet()
     }
 
+    public close() : Promise<void> {
+        this.cursor.close()
+        return undefined
+    }
 }

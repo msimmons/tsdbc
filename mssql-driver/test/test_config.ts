@@ -1,7 +1,9 @@
 import * as mssql from 'mssql'
+import { DriverConfig } from 'tsdbc'
 
 export const config = {
-    server: 'localhost',
-    user: 'sa',
+    host: 'localhost',
+    username: 'sa',
     password: 'K3nd0n60',
-} as mssql.config
+    database: undefined
+} as DriverConfig

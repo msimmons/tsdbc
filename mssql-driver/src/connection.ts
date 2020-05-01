@@ -1,15 +1,19 @@
-import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from 'tsdbc'
+import { Connection, Result, CallableStatement, TransactionIsolation, PreparedStatement, DatabaseError } from 'tsdbc'
 import { Request, Transaction, ConnectionPool, ISOLATION_LEVEL } from 'mssql'
-import { MSSQLStatement } from './statement'
+import { MSSQLResult } from './result'
 
 export class MSSQLConnection implements Connection {
 
     private request: Request
     private transaction: Transaction
-    private statement: MSSQLStatement
     
     autoCommit: boolean
     networkTimeout: number
+    queryTimeout: number
+    fetchSize: number
+    transactionIsolation : TransactionIsolation
+    closed : boolean = false
+    readOnly : boolean
 
     constructor(pool: ConnectionPool, autoCommit: boolean) {
         this.autoCommit = autoCommit
@@ -21,51 +25,26 @@ export class MSSQLConnection implements Connection {
             this.request = this.transaction.request()
         }
     }
-
-    createStatement(type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): Statement {
-        if (this.statement && !this.statement.closed) throw new Error("A statement is still open")
-        if (this.closed) throw new Error("The connection is closed")
-        this.statement = new MSSQLStatement(this.request)
-        return this.statement
+    async execute(sql: string, autogens?: string[]): Promise<Result> {
+        this.request.stream = true
+        let iresult = this.request.query(sql)
+        return new MSSQLResult(sql, this.request, iresult, this.fetchSize)
     }
 
-    prepareCall(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): CallableStatement {
+    prepareCall(sql: string): CallableStatement {
         throw new Error("Method not implemented.");
     }
 
-    prepareStatement(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): PreparedStatement {
+    prepareStatement(sql: string): PreparedStatement {
         throw new Error("Method not implemented.");
     }
-
-    // catalog(): string {
-    //     return ''
-    // }
-    // schema(): string {
-    //     return ''
-    // }
-
-    // holdability : ResultSetHoldability
-    // networkTimeout :  number
-    transactionIsolation : TransactionIsolation
-    // warnings(): string {
-    //     throw new Error("Method not implemented.");
-    // }
-    closed : boolean = false
-    readOnly : boolean
 
     valid(timeout: number): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
 
-    // abort(): Promise<Result> {
-    //     throw new Error("Method not implemented.");
-    // }
-
-    // clearWarnings(): void {
-    //     throw new Error("Method not implemented.");
-    // }
-
     begin(isolation? : TransactionIsolation) : Promise<void> {
+        this.transactionIsolation = isolation
         return new Promise((resolve, reject) => {
             if (this.transaction) this.transaction.begin(this.translateIsolationLevel(isolation), error => {
                 if (error) reject(<DatabaseError>{code: error.code, message: error.message, vendor: error})

@@ -1,19 +1,3 @@
-export enum ResultSetType {
-    ForwardOnly,
-    ScrollInsensitive,
-    ScrollSensitive
-}
-
-export enum ResultSetConcurrency {
-    ReadOnly,
-    Updateable
-}
-
-export enum ResultSetHoldability {
-    HoldOverCommit,
-    CloseOverCommit
-}
-
 export enum TransactionIsolation {
     ReadUncommitted,
     ReadCommitted,
@@ -31,6 +15,7 @@ export interface TableData {
     namespace: string
     name: string
     columns: ColumnData[]
+    indices: string[]
     grants?: GrantData[]
 }
 export interface IndexData {
@@ -114,8 +99,16 @@ export class DatabaseError extends Error {
     readonly vendor: any
 }
 
+export interface DriverConfig {
+    host: string
+    port?: number
+    username: string
+    password: string
+    database: string
+}
+
 export interface Driver {
-    load(config: any, vendorConfig?: any) : DataSource
+    load(config: DriverConfig, vendorConfig?: any) : DataSource
 }
 
 export interface DataSource {
@@ -130,22 +123,17 @@ export interface Connection {
     readonly transactionIsolation : TransactionIsolation
     readonly closed : boolean
     networkTimeout : number
-    readOnly : boolean
+    queryTimeout : number
+    //readOnly : boolean
     autoCommit : boolean
+    fetchSize : number
 
-    //abort() : Promise<Result>
-    //clearWarnings() : void
-    //warnings() : string
-    // various object create functions
+    // Statement related
+    execute(sql: string, autogens?: string[]) : Promise<Result>
 
-    createStatement(type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability) : Statement
-    prepareCall(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability) : CallableStatement
-    prepareStatement(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability) : PreparedStatement
-
-    //catalog() : string
-    //schema() : string
-    //holdability : ResultSetHoldability
-    //typemap?
+    //createStatement() : Statement
+    //prepareCall(sql: string) : CallableStatement
+    //prepareStatement(sql: string) : PreparedStatement
 
     // Transaction related
     begin(isolation?: TransactionIsolation) : Promise<void>
@@ -163,52 +151,25 @@ export interface RowSet {
     readonly columns: any[]
     readonly rows: any[]
     readonly moreRows: boolean
+    readonly rowCount: number 
 }
 
 export interface Result {
-    readonly updateCounts: number[]
     readonly rowSets: RowSet[]
-    readonly warnings: string[]
-    readonly error: DatabaseError
-
     fetch() : Promise<RowSet>
+    close() : Promise<void>
 }
 
-export interface Statement {
-
-    readonly closed : boolean
-    fetchSize : number
-    queryTimeout : number
-    readonly result : Result
-
-    addBatch(sql: string) : void
-    clearBatch() : void
-    executeBatch() : Promise<Result[]>
-
-    execute(sql: string, autogens?: string[]) : Promise<RowSet>
-    fetch() : Promise<RowSet>
-    generatedKeys() : Promise<RowSet>
-
-    cancel() : Promise<Result>
-    close() : Promise<Result>
-    //readonly connection : Connection
-    //fetchDirection : number
-    //concurrency : ResultSetConcurrency
-    //holdability : ResultSetHoldability
-    //type : ResultSetType
-}
-
-export interface CallableStatement extends Statement {
+export interface CallableStatement {
     // All the parameter and out param methods
 }
 
-export interface PreparedStatement extends Statement {}
+export interface PreparedStatement {}
 
 export class DriverManager {
 
     static async load(path: string) : Promise<Driver> {
         let driver = await import(path)
-        console.log(driver)
         return driver.driver
     }
 }

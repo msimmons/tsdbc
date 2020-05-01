@@ -1,4 +1,4 @@
-import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData } from 'tsdbc'
+import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig } from 'tsdbc'
 import { MSSQLConnection } from './connection'
 import { SQL } from './sql'
 import { config, ConnectionPool, Request } from 'mssql'
@@ -10,8 +10,13 @@ export class MSSQLDataSource implements DataSource {
     private info: Map<string, string>
     lastError: DatabaseError
 
-    constructor(config: config) {
-        this.config = config
+    constructor(config: DriverConfig, vendorConfig?: config) {
+        vendorConfig = vendorConfig ?? {server: config.host, port: config.port, user: config.username, password: config.password, database: config.database}
+        vendorConfig.server = vendorConfig.server ?? config.host
+        vendorConfig.user = vendorConfig.user ?? config.username
+        vendorConfig.password = vendorConfig.password ?? config.password
+        vendorConfig.database = vendorConfig.database ?? config.database
+        this.config = vendorConfig
     }
 
     public async close() : Promise<void> {
@@ -33,12 +38,13 @@ export class MSSQLDataSource implements DataSource {
         if (this.info) return this.info
         let request = this.pool.request()
         let result = await request.query(SQL.CLIENT_INFO)
-        Object.keys(result.recordset.columns).forEach(key => {
-            //console.log(result.recordset.columns[key])
-        })
-        console.log({...result})
-        //console.log(result.recordset.toTable().rows)
-        return new Map()
+        let map = new Map<string,string>()
+        if (result.recordset.length === 1) {
+            Object.keys(result.recordset[0]).forEach(key => {
+                map.set(key, result.recordset[0][key])
+            })
+        }
+        return map
     }
 
     async metaData(): Promise<DatabaseMetadata> {
@@ -64,13 +70,13 @@ export class MSSQLDataSource implements DataSource {
             nsMap.set(record.name, ns)
             return ns
         })
-        let tableMap = new Map<number, TableData>()
+        let tableMap = new Map<number, TableData|ViewData>()
         let procMap = new Map<number, ProcedureData>()
         ;(await request.query(SQL.OBJECTS)).recordset.forEach(record => {
             let type = record.type.trim()
             if (['U','S','IT'].includes(type)) {
                 let fullNs = `${db}.${record.namespace}`
-                let table = {namespace: fullNs, name: record.name, columns: []} as TableData
+                let table = {namespace: fullNs, name: record.name, columns: [], indices: []} as TableData
                 tableMap.set(record.object_id, table)
                 nsMap.get(record.namespace).tables.push(table)
             }
@@ -109,9 +115,11 @@ export class MSSQLDataSource implements DataSource {
         })
         ;(await request.query(SQL.INDEX_COLUMNS)).recordset.forEach(record => {
             if (tableMap.has(record.object_id)) {
-                let column = tableMap.get(record.object_id).columns[record.column_id-1]
+                let table = tableMap.get(record.object_id) as TableData
+                let column = table.columns[record.column_id-1]
                 let index = {name: record.name, position: record.key_ordinal, descending: record.is_descending_key, unique: record.is_unique} as IndexData
-                    column.indices.push(index)
+                if (column) column.indices.push(index)
+                if (!table.indices.includes(index.name)) table.indices.push(index.name)
             }
         })
         return namespaces

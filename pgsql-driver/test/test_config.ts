@@ -1,7 +1,8 @@
-import {PoolConfig} from 'pg'
+import { DriverConfig } from 'tsdbc'
 
 export const config = {
     host: 'localhost',
-    user: 'postgres',
+    username: 'postgres',
     password: 'password',
-} as PoolConfig
+    database: undefined
+} as DriverConfig

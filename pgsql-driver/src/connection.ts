@@ -1,32 +1,33 @@
-import { Connection, Result, ResultSetType, ResultSetConcurrency, ResultSetHoldability, CallableStatement, TransactionIsolation, Statement, PreparedStatement, DatabaseError } from 'tsdbc'
-import { Pool, PoolClient } from 'pg'
-import { PGStatement } from './statement'
+import { Connection, Result, CallableStatement, TransactionIsolation, PreparedStatement, DatabaseError } from 'tsdbc'
+import { PoolClient } from 'pg'
+import * as Cursor from 'pg-cursor'
+import { PGResult } from './result'
 
 export class PGConnection implements Connection {
 
     private client: PoolClient
-    private statement: PGStatement
-    
-    autoCommit: boolean
+    queryTimeout: number
     networkTimeout: number
+    fetchSize: number
+    autoCommit: boolean
 
     constructor(client: PoolClient, autoCommit: boolean) {
         this.autoCommit = autoCommit
         this.client = client
     }
 
-    createStatement(type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): Statement {
-        if (this.statement && !this.statement.closed) throw new Error("A statement is still open")
-        if (this.closed) throw new Error("The connection is closed")
-        this.statement = new PGStatement(this.client)
-        return this.statement
+    async execute(sql: string, autogens?: string[]): Promise<Result> {
+        let cursor = new Cursor(sql)
+        let query = await this.client.query(cursor)
+        console.log(query)
+        return new PGResult(sql, cursor, this.fetchSize)
     }
 
-    prepareCall(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): CallableStatement {
+    prepareCall(sql: string): CallableStatement {
         throw new Error("Method not implemented.");
     }
 
-    prepareStatement(sql: string, type?: ResultSetType, concurrency?: ResultSetConcurrency, holdability?: ResultSetHoldability): PreparedStatement {
+    prepareStatement(sql: string): PreparedStatement {
         throw new Error("Method not implemented.");
     }
 

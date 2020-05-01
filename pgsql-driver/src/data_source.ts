@@ -1,4 +1,4 @@
-import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData } from 'tsdbc'
+import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig } from 'tsdbc'
 import { PGConnection } from './connection'
 import { SQL } from './sql'
 import { Pool, PoolConfig }  from 'pg'
@@ -7,11 +7,15 @@ export class PGDataSource implements DataSource {
 
     private config: PoolConfig
     private pool: Pool
-    private info: Map<string, string>
     lastError: DatabaseError
 
-    constructor(config: PoolConfig) {
-        this.config = config
+    constructor(config: DriverConfig, vendorConfig?: PoolConfig) {
+        vendorConfig = vendorConfig ?? {host: config.host, user: config.username, password: config.password, database: config.database}
+        vendorConfig.host = vendorConfig.host ?? config.host
+        vendorConfig.user = vendorConfig.user ?? config.username
+        vendorConfig.password = vendorConfig.password ?? config.password
+        vendorConfig.database = vendorConfig.database ?? config.database
+        this.config = vendorConfig
     }
 
     public async close() {
@@ -50,10 +54,10 @@ export class PGDataSource implements DataSource {
             nsMap.set(ns.name, ns)
             return ns
         })
-        let tableMap = new Map<string, TableData>()
+        let tableMap = new Map<string, TableData|ViewData>()
         let procMap = new Map<string, ProcedureData>()
         ;(await client.query(SQL.TABLES)).rows.forEach(record => {
-            let table = {namespace: record.schemaname, name: record.tablename, columns: []} as TableData
+            let table = {namespace: record.schemaname, name: record.tablename, columns: [], indices: []} as TableData
             let key = `${table.namespace}.${table.name}`
             tableMap.set(key, table)
             nsMap.get(table.namespace).tables.push(table)
@@ -88,9 +92,11 @@ export class PGDataSource implements DataSource {
         ;(await client.query(SQL.INDEX_COLUMNS)).rows.forEach(record => {
             let key = `${record.schema}.${record.table_name}`
             if (tableMap.has(key)) {
-                let column = tableMap.get(key).columns.find(c => c.name === record.column_name)
+                let table = <TableData>tableMap.get(key)
+                let column = table.columns.find(c => c.name === record.column_name)
                 let index = {name: record.index_name, position: 0, descending: false, unique: record.is_unique} as IndexData
                 if (column) column.indices.push(index)
+                if (!table.indices.includes(index.name)) table.indices.push(index.name)
             }
         })
         client.release()
