@@ -15,6 +15,7 @@ export class PGDataSource implements DataSource {
         vendorConfig.user = vendorConfig.user ?? config.username
         vendorConfig.password = vendorConfig.password ?? config.password
         vendorConfig.database = vendorConfig.database ?? config.database
+        console.log(vendorConfig)
         this.config = vendorConfig
     }
 
@@ -81,7 +82,9 @@ export class PGDataSource implements DataSource {
         ;(await client.query(SQL.COLUMNS)).rows.forEach(record => {
             let column = {name: record.column_name, type: record.data_type, size: record.maxlen, position: record.position, nullable: record.is_nullable, indices: []} as ColumnData
             let key = `${record.schema}.${record.table_name}`
+            if (!["information_schema","pg_catalog"].includes(record.schema)) console.log(key)
             if (tableMap.has(key)) tableMap.get(key).columns.push(column)
+            else console.log(`No table found for ${key}`)
         })
         ;(await client.query(SQL.PARAMETERS)).rows.forEach(record => {
             let inOut = record.in_out ? 'OUT' : 'IN'
@@ -94,7 +97,7 @@ export class PGDataSource implements DataSource {
             if (tableMap.has(key)) {
                 let table = <TableData>tableMap.get(key)
                 let column = table.columns.find(c => c.name === record.column_name)
-                let index = {name: record.index_name, position: 0, descending: false, unique: record.is_unique} as IndexData
+                let index = {name: record.index_name, position: record.position, descending: false, unique: record.is_unique} as IndexData
                 if (column) column.indices.push(index)
                 if (!table.indices.includes(index.name)) table.indices.push(index.name)
             }

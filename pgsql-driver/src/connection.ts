@@ -17,9 +17,8 @@ export class PGConnection implements Connection {
     }
 
     async execute(sql: string, autogens?: string[]): Promise<Result> {
-        let cursor = new Cursor(sql)
-        let query = await this.client.query(cursor)
-        console.log(query)
+        let cursor = await new Cursor(sql, [])
+        await this.client.query(cursor)
         return new PGResult(sql, cursor, this.fetchSize)
     }
 

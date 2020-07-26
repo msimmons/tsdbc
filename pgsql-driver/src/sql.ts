@@ -82,12 +82,13 @@ INDEX_COLUMNS:
    t.relname as table_name,
    i.relname as index_name,
    a.attname as column_name,
-   ix.indisunique as is_unique
+   ix.indisunique as is_unique,
+   row_number() over (partition by n.nspname, t.relname, i.relname) as position
 from
    pg_index ix
    join pg_class t on t.oid = ix.indrelid and t.relkind = 'r'
    join pg_namespace n on n.oid = t.relnamespace
    join pg_class i on i.oid = ix.indexrelid
-   join pg_attribute a on a.attnum = ANY(ix.indkey)
+   join pg_attribute a on a.attnum = ANY(ix.indkey) and a.attrelid = t.oid
 `
 }
