@@ -38,6 +38,7 @@ describe('A Statement', () => {
             caught = error
         }
         expect(caught).to.not.be.undefined
+        console.log(caught)
         console.log(caught.message)
         await cnx.close()
     })

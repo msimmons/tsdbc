@@ -12,10 +12,10 @@ export class PGDataSource implements DataSource {
     constructor(config: DriverConfig, vendorConfig?: PoolConfig) {
         vendorConfig = vendorConfig ?? {host: config.host, user: config.username, password: config.password, database: config.database}
         vendorConfig.host = vendorConfig.host ?? config.host
+        vendorConfig.port = vendorConfig.port ?? config.port
         vendorConfig.user = vendorConfig.user ?? config.username
         vendorConfig.password = vendorConfig.password ?? config.password
         vendorConfig.database = vendorConfig.database ?? config.database
-        console.log(vendorConfig)
         this.config = vendorConfig
     }
 
@@ -76,15 +76,13 @@ export class PGDataSource implements DataSource {
             nsMap.get(proc.namespace).procedures.push(proc)
         })
         ;(await client.query(SQL.SEQUENCES)).rows.forEach(record => {
-            let seq =  {namespace: record.namespace, name: record.name} as SequenceData
+            let seq =  {namespace: record.schema, name: record.name} as SequenceData
             nsMap.get(seq.namespace).sequences.push(seq)
         })
         ;(await client.query(SQL.COLUMNS)).rows.forEach(record => {
             let column = {name: record.column_name, type: record.data_type, size: record.maxlen, position: record.position, nullable: record.is_nullable, indices: []} as ColumnData
             let key = `${record.schema}.${record.table_name}`
-            if (!["information_schema","pg_catalog"].includes(record.schema)) console.log(key)
             if (tableMap.has(key)) tableMap.get(key).columns.push(column)
-            else console.log(`No table found for ${key}`)
         })
         ;(await client.query(SQL.PARAMETERS)).rows.forEach(record => {
             let inOut = record.in_out ? 'OUT' : 'IN'
