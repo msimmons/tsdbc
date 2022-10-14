@@ -6,7 +6,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "test": "../node_modules/.bin/mocha -r ts-node/register --exit test/**/*.test.ts",
-    "bundle": "../node_modules/.bin/parcel build src/driver.ts --target node --bundle-node-modules -o mssql-driver.js"
+    "bundle": "ncc build src/driver.ts -ms -o ncc"
   },
   "repository": {
     "type": "git",

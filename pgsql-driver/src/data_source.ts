@@ -1,4 +1,4 @@
-import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig } from 'tsdbc'
+import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig, PlanData } from 'tsdbc'
 import { PGConnection } from './connection'
 import { SQL } from './sql'
 import { Pool, PoolConfig }  from 'pg'
@@ -20,13 +20,22 @@ export class PGDataSource implements DataSource {
     }
 
     public async close() {
+        console.log("closing pool")
         if (this.pool) await this.pool.end()
+        console.log("pool closed")
     }
 
     public async connect(autoCommit?: boolean) : Promise<PGConnection> {
         await this.start()
         try {
+            console.log("connecting")
             let client = await this.pool.connect()
+            client.on("error", (err) => {console.log(`client.error ${err}`)})
+            client.on("end", () => {console.log("client.end")})
+            client.on("drain", () => {console.log("client.drain")})
+            client.on("notice", (arg) => {console.log(`client.notice ${arg}`)})
+            client.on("notification", (arg) => {console.log(`client.notification ${arg}`)})
+            console.log("connected")
             return new PGConnection(client, autoCommit)
         }
         catch (error) {
@@ -69,6 +78,12 @@ export class PGDataSource implements DataSource {
             tableMap.set(key, view)
             nsMap.get(view.namespace).views.push(view)
         })
+        ;(await client.query(SQL.MATERIALIZED_VIEWS)).rows.forEach(record => {
+            let view = {namespace: record.schemaname, name: record.matviewname, columns: []} as ViewData
+            let key = `${view.namespace}.${view.name}`
+            tableMap.set(key, view)
+            nsMap.get(view.namespace).views.push(view)
+        })
         ;(await client.query(SQL.PROCEDURES)).rows.forEach(record => {
             let proc = {namespace: record.schema, name: record.name, parameters: []} as ProcedureData
             let key = `${proc.namespace}.${proc.name}`
@@ -104,12 +119,26 @@ export class PGDataSource implements DataSource {
         return {namespaces: namespaces }
     }
 
+    async explain(sql: string): Promise<PlanData> {
+        await this.start()
+        let client = await this.pool.connect()
+        let result = await client.query(`EXPLAIN ${sql}`)
+        for (const row of result.rows) {
+            console.log(row);
+        }
+        client.release()
+        return {}
+    }
+
     private async start() {
         if (this.pool) return
         this.pool = new Pool(this.config)
+        this.pool.on("acquire", (client) => {console.log(`pool.acquire`)})
         this.pool.on('error', (error) => {
             this.lastError = error ? <DatabaseError>{code: error.name, message: error.message, vendor: error} : undefined            
         })
+        this.pool.on("connect", (client) => {console.log(`pool.connect`)})
+        this.pool.on("remove", (client) => {console.log(`pool.remove`)})
     }
 
 }

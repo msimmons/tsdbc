@@ -1,4 +1,4 @@
-import { Connection, Result, CallableStatement, TransactionIsolation, PreparedStatement, DatabaseError } from 'tsdbc'
+import { Connection, Result, CallableStatement, TransactionIsolation, PreparedStatement, DatabaseError, PlanData } from 'tsdbc'
 import { PoolClient } from 'pg'
 import * as Cursor from 'pg-cursor'
 import { PGResult } from './result'
@@ -10,6 +10,7 @@ export class PGConnection implements Connection {
     networkTimeout: number
     fetchSize: number
     autoCommit: boolean
+    inTransaction = false
 
     constructor(client: PoolClient, autoCommit: boolean) {
         this.autoCommit = autoCommit
@@ -30,19 +31,7 @@ export class PGConnection implements Connection {
         throw new Error("Method not implemented.");
     }
 
-    // catalog(): string {
-    //     return ''
-    // }
-    // schema(): string {
-    //     return ''
-    // }
-
-    // holdability : ResultSetHoldability
-    // networkTimeout :  number
     transactionIsolation : TransactionIsolation
-    // warnings(): string {
-    //     throw new Error("Method not implemented.");
-    // }
     closed : boolean = false
     readOnly : boolean
 
@@ -50,16 +39,9 @@ export class PGConnection implements Connection {
         throw new Error("Method not implemented.");
     }
 
-    // abort(): Promise<Result> {
-    //     throw new Error("Method not implemented.");
-    // }
-
-    // clearWarnings(): void {
-    //     throw new Error("Method not implemented.");
-    // }
-
     async begin(isolation? : TransactionIsolation) : Promise<void> {
         await this.client.query('BEGIN') // TODO Isolation level?
+        this.inTransaction = true
     }
 
     setSavepoint(name?: string) : Promise<void> {
@@ -71,14 +53,21 @@ export class PGConnection implements Connection {
     }
 
     async rollback(savepoint?: any): Promise<void> {
-        await this.client.query('ROLLBACK')
+        try {
+            if (this.inTransaction) await this.client.query('ROLLBACK')
+            this.inTransaction = false
+        } catch (error) {
+            console.log(`Error rolling back: ${error}`)
+        }
     }
 
     async commit(): Promise<void> {
-        await this.client.query('COMMIT')
+        if (this.inTransaction) await this.client.query('COMMIT')
+        this.inTransaction = false
     }
 
     close(): Promise<void> {
+        console.log("releasing connection")
         this.client.release()
         this.closed = true
         return undefined

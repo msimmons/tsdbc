@@ -59,13 +59,20 @@ export class PGResult implements Result {
         })
     }
 
-    public fetch() : Promise<RowSet> {
+    public async fetch() : Promise<RowSet> {
         if (this.done) return undefined
-        return this.nextResultSet()
+        try {
+            let rs = await this.nextResultSet()
+            return rs
+        } catch(error) {
+            // Close here since we aren't returning the RowSet for client to close
+            await this.close()
+            throw error;
+        }
     }
 
-    public close() : Promise<void> {
-        this.cursor.close()
+    public async close() : Promise<void> {
+        await this.cursor.close()
         return undefined
     }
 }

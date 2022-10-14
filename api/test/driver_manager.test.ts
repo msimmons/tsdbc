@@ -6,7 +6,7 @@ M.describe('A Driver Manager', () => {
 
     it('Loads the mssql driver', async () => {
         try {
-            let driver = await DriverManager.load('../../mssql-driver/dist/mssql-driver.js')
+            let driver = await DriverManager.load('../../mssql-driver/ncc/index.js')
             let ds = driver.load({host: 'localhost', username: 'sa', password: 'K3nd0n60', database: undefined})
             let connection = await ds.connect()
             console.log(await ds.clientInfo())

@@ -80,6 +80,9 @@ export interface OtherData{
     vendor: any
 }
 
+export interface PlanData {
+}
+
 export interface Namespace { // Schemas and Catalogs
     name: string
     tables: TableData[]
@@ -115,6 +118,7 @@ export interface DataSource {
     connect(autoCommit?: boolean) : Promise<Connection>
     metaData() : Promise<DatabaseMetadata>
     clientInfo() : Promise<Map<string, string>>
+    explain(sql: string): Promise<PlanData>
     close() : Promise<void>
 }
 
@@ -131,10 +135,6 @@ export interface Connection {
     // Statement related
     execute(sql: string, autogens?: string[]) : Promise<Result>
 
-    //createStatement() : Statement
-    //prepareCall(sql: string) : CallableStatement
-    //prepareStatement(sql: string) : PreparedStatement
-
     // Transaction related
     begin(isolation?: TransactionIsolation) : Promise<void>
     setSavepoint(name?: string) : Promise<void>
@@ -142,6 +142,7 @@ export interface Connection {
     rollback(savepoint?: any) : Promise<void>
     commit() : Promise<void>
 
+    // Admin
     valid(timeout: number) : Promise<boolean>
     close() : Promise<void>
 }

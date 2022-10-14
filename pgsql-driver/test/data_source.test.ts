@@ -38,12 +38,14 @@ describe('A DataSource', () => {
     it('returns database meta data', async () => {
         let ds = new PGDataSource(config2, {})
         let info = await ds.metaData()
-        //expect(info.namespaces.length).to.be.gt(0)
-        let sys = info.namespaces.find(ns => ns.name === 'pg_catalog')
-        //expect(sys.tables.length).to.be.gt(0)
-        //expect(sys.tables[0].columns.length).to.be.gt(0)
-        let t = sys.tables.filter(t => t.columns.find(c => c.indices.length > 0))
-        expect(t.length).to.be.gt(0)
+        expect(info.namespaces.length).eql(6)
         await ds.close()
     })
-})//.timeout(30000)
+
+    it('returns the explain plan', async () => {
+        let ds = new PGDataSource(config2, {})
+        let info = await ds.explain("select * from users")
+        await ds.close()
+    })
+
+})

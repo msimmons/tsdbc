@@ -1,0 +1,33 @@
+name: Build
+on:
+  push:
+jobs:
+  build:
+    name: Build
+  steps:
+  - uses: actions/checkout@v3
+  - uses: actions/setup-node@v3
+    with:
+      node-version: 14
+      cache: npm
+      cache-dependency-path: api/package-lock.json
+  - uses: actions/setup-node@v3
+    with:
+      node-version: 14
+      cache: npm
+      cache-dependency-path: mssql-driver/package-lock.json
+  - uses: actions/setup-node@v3
+    with:
+      node-version: 14
+      cache: npm
+      cache-dependency-path: pgsql-driver/package-lock.json
+  - run: |
+      npm install
+      npm --prefix api install
+      npm --prefix api run build
+      npm --prefix mssql-driver install
+      npm --prefix mssql-driver run bundle
+      npm --prefix pgsql-driver install
+      npm --prefix pgsql-driver run bundle
+      cd api
+      npm pack

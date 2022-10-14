@@ -27,6 +27,12 @@ VIEWS:
 from
    pg_catalog.pg_views
 `,
+MATERIALIZED_VIEWS:
+`select
+   *
+from
+   pg_catalog.pg_matviews
+`,
 PROCEDURES:
 `select
    specific_schema as schema,
