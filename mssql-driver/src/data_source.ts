@@ -1,4 +1,4 @@
-import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig } from 'tsdbc'
+import { DataSource, DatabaseError, DatabaseMetadata, Namespace, TableData, ProcedureData, ViewData, SequenceData, SynonymData, ColumnData, ParameterData, IndexData, DriverConfig, PlanData } from 'tsdbc'
 import { MSSQLConnection } from './connection'
 import { SQL } from './sql'
 import { config, ConnectionPool, Request } from 'mssql'
@@ -17,6 +17,10 @@ export class MSSQLDataSource implements DataSource {
         vendorConfig.password = vendorConfig.password ?? config.password
         vendorConfig.database = vendorConfig.database ?? config.database
         this.config = vendorConfig
+    }
+
+    explain(sql: string): Promise<PlanData> {
+        throw new Error('Method not implemented.')
     }
 
     public async close() : Promise<void> {

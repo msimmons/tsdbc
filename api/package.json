@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Database Connectivity for Typescript",
   "main": "./out/src/tsdbc_api.js",
-  "files" :[
+  "files": [
     "out/src/**"
   ],
   "scripts": {
