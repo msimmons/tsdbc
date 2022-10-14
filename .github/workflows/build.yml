@@ -23,6 +23,7 @@ jobs:
         cache: npm
         cache-dependency-path: pgsql-driver/package-lock.json
     - run: |
+        npm install -g ncc
         npm install
         npm --prefix api install
         npm --prefix api run build
