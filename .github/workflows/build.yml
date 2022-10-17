@@ -33,3 +33,7 @@ jobs:
         npm --prefix pgsql-driver run bundle
         cd api
         npm pack
+    - uses: actions/upload-artifact@v3
+        with:
+          name: tsdbc
+          path: dist/**
