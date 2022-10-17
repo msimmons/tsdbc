@@ -34,6 +34,6 @@ jobs:
         cd api
         npm pack
     - uses: actions/upload-artifact@v3
-        with:
-          name: tsdbc
-          path: dist/**
+      with:
+        name: tsdbc
+        path: dist/**
